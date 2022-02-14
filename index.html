@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <script src="js/campo-minado.js"></script>
+    </head>
+    <body>
+        <div id="exibir-execucao"></div>
+
+        <script>
+            var campoMinado = new CampoMinado();
+            
+            
+            document.getElementById('exibir-execucao').innerHTML += '----------- Início do jogo -----------';
+            document.getElementById('exibir-execucao').innerHTML += '<pre>' + campoMinado.Tabuleiro() + '</pre>';
+            
+            // Realize sua codificação a partir deste ponto, boa sorte!
+
+            //Transformar campoMinado.Tabuleiro() em um array de arrays (matriz)
+            var tabuleiro = campoMinado.Tabuleiro().split("\r\n");
+
+
+            //variavel bomba que deve retornar verdadeiro ou falso
+            var bomba
+            //Declarar as posições ao redor
+            let superior = null;
+            let superiorEsquerdo = null;
+            let superiorDireito = null;
+            let esquerdo = null;
+            let direito = null;
+            let inferior = null;
+            let inferiorEsquerdo = null;
+            let inferiorDireito = null;
+            
+            //Dois for para percorrer toda a matriz, onde x representa a linha e o y presenta a coluna
+            for (x=0;x<9;x++) {
+                
+                
+
+                for (y=0;y<9;y++) {    
+                    if(tabuleiro[x][y] == "-") {
+                        //Verificar ao redor se não for nulo
+                        if (x != 0) { 
+                            superior = tabuleiro[x-1][y];
+                            procurarBomba(x-1, y);
+                        }
+                        if (x !==0 && y != 0) {
+                            superiorEsquerdo = tabuleiro[x-1][y-1];
+                            procurarBomba(x-1, y-1); 
+                        }
+                        if (x != 0 && y != 8) {
+                            superiorDireito = tabuleiro[x-1][y+1];
+                            procurarBomba(x-1, y+1); 
+                        }
+                        if (y != 0) {
+                            esquerdo = tabuleiro[x][y-1];
+                            procurarBomba(x, y-1); 
+                        }
+                        if (y != 8) {
+                            direito = tabuleiro[x][y+1];
+                            procurarBomba(x, y+1); 
+                        }
+                        if (x != 8) {
+                            inferior = tabuleiro[x+1][y];
+                            procurarBomba(x+1, y); 
+                        }
+                        if (x != 8 && y != 0) {
+                            inferiorEsquerdo = tabuleiro[x+1][y-1];
+                            procurarBomba(x+1, y-1);
+                        }
+                        if (x != 8 && y != 8) {
+                            inferiorDireito = tabuleiro[x+1][y+1];
+                            procurarBomba(x+1, y+1);
+                        }
+                        //Se variavel bomba for falso, abre casa na posição atual
+                        if (bomba == false) {
+                            campoMinado.Abrir(x+1,y+1);
+                            document.getElementById('exibir-execucao').innerHTML += 'Abrindo casa: linha(' + (x+1) + ') / coluna(' + (y+1) + ')' + '</br>';
+                            document.getElementById('exibir-execucao').innerHTML += '----------- Status: Jogo em aberto -----------' + '</br>';
+                            document.getElementById('exibir-execucao').innerHTML += '<pre>' + campoMinado.Tabuleiro() + '</pre>';
+                        }
+                        //Se variavel bomba for verdadeira, exibe a mensagem informando a posição da bomba
+                        else if(bomba == true) {
+                            document.getElementById('exibir-execucao').innerHTML += 'Bomba encontrada: linha(' + (x+1) + ') / coluna(' + (y+1) + ')' + '</br>';
+                        }
+
+                        //Verificar a status do jogo e para caso o status mude e exibe a mesagem de acordo com o status    
+                        if (campoMinado.JogoStatus()==2) {
+                            document.getElementById('exibir-execucao').innerHTML += '----------- Status: GameOver, você encontrou uma bomba -----------' + '</br>';
+                            break;
+                        } 
+                        else if (campoMinado.JogoStatus()==1) {
+                            document.getElementById('exibir-execucao').innerHTML += '----------- Status: Vitoria -----------' + '</br>';
+                            break;
+                        }
+
+                        
+
+                    }
+                //Verificar a status do jogo e para caso o status mude    
+                }
+                if (campoMinado.JogoStatus()==2) {
+                    break;
+                } 
+                else if (campoMinado.JogoStatus()==1) {
+                    break;
+                }
+                
+            }
+            //Função para procurar bombas de acordo com a regra númerica, se encontrar uma bomba retorna verdadeiro, caso contraio retorna falso
+            function procurarBomba(x, y) {
+                if(tabuleiro[x][y] == "1") {
+                    //Verificar ao redor se não for nulo de todos os números 1
+                    if (x != 0) { 
+                        superior = tabuleiro[x-1][y];
+                    }
+                    if (x !==0 && y != 0) {
+                        superiorEsquerdo = tabuleiro[x-1][y-1];   
+                    }
+                    if (x != 0 && y != 8) {
+                        superiorDireito = tabuleiro[x-1][y+1];
+                    }
+                    if (y != 0) {
+                        esquerdo = tabuleiro[x][y-1];
+                    }
+                    if (y != 8) {
+                        direito = tabuleiro[x][y+1];   
+                    }
+                    if (x != 8) {
+                        inferior = tabuleiro[x+1][y];
+                    }
+                    if (x != 8 && y != 0) {
+                        inferiorEsquerdo = tabuleiro[x+1][y-1]; 
+                    }
+                    if (x != 8 && y != 8) {
+                        inferiorDireito = tabuleiro[x+1][y+1];   
+                    }
+                    //Armazenar os valores ao redor
+                    var aoRedor = [superior,superiorDireito,superiorEsquerdo,esquerdo,direito,inferior,inferiorEsquerdo,inferiorDireito];
+                    //Filtra a quatidade de casas que podem ser abertas ao redor do 1, se for igual 1 significa que tem 1 bomba na casa
+                    if(aoRedor.filter(x => x == "-").length == 1){
+                        bomba = true;
+                    }
+                    else {
+                        bomba = false;
+                    }
+                
+                }
+                else if(tabuleiro[x][y] == "2") {
+                    //Verificar ao redor se não for nulo de todos os números 2
+                    if (x != 0) { 
+                        superior = tabuleiro[x-1][y];
+                    }
+                    if (x !==0 && y != 0) {
+                        superiorEsquerdo = tabuleiro[x-1][y-1];   
+                    }
+                    if (x != 0 && y != 8) {
+                        superiorDireito = tabuleiro[x-1][y+1];
+                    }
+                    if (y != 0) {
+                        esquerdo = tabuleiro[x][y-1];
+                    }
+                    if (y != 8) {
+                        direito = tabuleiro[x][y+1];   
+                    }
+                    if (x != 8) {
+                        inferior = tabuleiro[x+1][y];
+                    }
+                    if (x != 8 && y != 0) {
+                        inferiorEsquerdo = tabuleiro[x+1][y-1]; 
+                    }
+                    if (x != 8 && y != 8) {
+                        inferiorDireito = tabuleiro[x+1][y+1];   
+                    }
+                    //Armazenar os valores ao redor
+                    var aoRedor = [superior,superiorDireito,superiorEsquerdo,esquerdo,direito,inferior,inferiorEsquerdo,inferiorDireito];
+                    //Filtra a quatidade de casas que podem ser abertas ao redor do 2, se for igual 2 significa que tem 2 bombas nas casas
+                    if(aoRedor.filter(x => x == "-").length == 2){
+                        bomba = true;
+                    }
+                    else {
+                        bomba = false;
+                    }
+                
+                }
+                else if(tabuleiro[x][y] == "3") {
+                    //Verificar ao redor se não for nulo de todos os números 3
+                    if (x != 0) { 
+                        superior = tabuleiro[x-1][y];
+                    }
+                    if (x !==0 && y != 0) {
+                        superiorEsquerdo = tabuleiro[x-1][y-1];   
+                    }
+                    if (x != 0 && y != 8) {
+                        superiorDireito = tabuleiro[x-1][y+1];
+                    }
+                    if (y != 0) {
+                        esquerdo = tabuleiro[x][y-1];
+                    }
+                    if (y != 8) {
+                        direito = tabuleiro[x][y+1];   
+                    }
+                    if (x != 8) {
+                        inferior = tabuleiro[x+1][y];
+                    }
+                    if (x != 8 && y != 0) {
+                        inferiorEsquerdo = tabuleiro[x+1][y-1]; 
+                    }
+                    if (x != 8 && y != 8) {
+                        inferiorDireito = tabuleiro[x+1][y+1];   
+                    }
+                    //Armazenar os valores ao redor
+                    var aoRedor = [superior,superiorDireito,superiorEsquerdo,esquerdo,direito,inferior,inferiorEsquerdo,inferiorDireito];
+                    //Filtra a quatidade de casas que podem ser abertas ao redor do 3, se for igual 3 significa que tem 3 bombas nas casas
+                    if(aoRedor.filter(x => x == "-").length == 3){
+                        bomba = true; 
+                    }
+                    else {
+                        bomba = false;
+                    }
+                
+                }
+                else if(tabuleiro[x][y] == "4") {
+                    //Verificar ao redor se não for nulo de todos os números 4
+                    if (x != 0) { 
+                        superior = tabuleiro[x-1][y];
+                    }
+                    if (x !==0 && y != 0) {
+                        superiorEsquerdo = tabuleiro[x-1][y-1];   
+                    }
+                    if (x != 0 && y != 8) {
+                        superiorDireito = tabuleiro[x-1][y+1];
+                    }
+                    if (y != 0) {
+                        esquerdo = tabuleiro[x][y-1];
+                    }
+                    if (y != 8) {
+                        direito = tabuleiro[x][y+1];   
+                    }
+                    if (x != 8) {
+                        inferior = tabuleiro[x+1][y];
+                    }
+                    if (x != 8 && y != 0) {
+                        inferiorEsquerdo = tabuleiro[x+1][y-1]; 
+                    }
+                    if (x != 8 && y != 8) {
+                        inferiorDireito = tabuleiro[x+1][y+1];   
+                    }
+                    //Armazenar os valores ao redor
+                    var aoRedor = [superior,superiorDireito,superiorEsquerdo,esquerdo,direito,inferior,inferiorEsquerdo,inferiorDireito];
+                    //Filtra a quatidade de casas que podem ser abertas ao redor do 4, se for igual 4 significa que tem 4 bombas nas casas
+                    if(aoRedor.filter(x => x == "-").length == 4){
+                        bomba = true; 
+                    }
+                    else {
+                        bomba = false;
+                    }
+                
+                }
+                
+            }
+        </script>
+    </body>
+</html>
